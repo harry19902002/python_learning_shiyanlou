@@ -15,15 +15,18 @@ def get_input():
 	if len(sys.argv) == 1:
 		print("Parameter Error")
 		return None		
-	for i in len(sys.argv):
+	for i in range(len(sys.argv)):
 		if i == 1:
 			continue
-		staff_dict
+		print(sys.argv[i-1])
+		inputList = sys.argv[i-1].split(':')
 		try:
-			return int(sys.argv[i])
+			return int(inputList[1])
 		except ValueError:
 			print("Parameter Error")
 			return None
+		staff_dict[inputList[0]] = inputList[1]
+	return True
 
 def calculate_insurance(income,insuranceSum):
 	return income * insuranceSum
@@ -59,7 +62,9 @@ if __name__ == '__main__':
 	insuranceSum = 0
 	for value in insurance_dict.values():
 		insuranceSum += value
-	income = get_input()
-	if income != None:
-		print(final_income)
+	if get_input() == True:
+		for key,value in staff_dict:
+			value = final_income(value)
+			print("%d:%.2f" %(key,value))
+	print(staff_dict)
 
