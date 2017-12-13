@@ -2,18 +2,34 @@
 
 import sys
 
-def get_input():
-	if len(sys.argv) != 2:
-		print("Parameter Error")
-		return None
-	try:
-		return int(sys.argv[1])
-	except ValueError:
-		print("Parameter Error")
-		return None
+insurance_dict = {'endowment_insurance':0.08,
+		'medical_insurance':0.02,
+		'unemplotment_insurance':0.005,
+		'injury_insurance':0,
+		'maternity_insurance':0,
+		'provient_found':0.06}
 
-def calculate_tax(income):
-	incomeTax = income - 3500
+staff_dict = {}
+
+def get_input():
+	if len(sys.argv) == 1:
+		print("Parameter Error")
+		return None		
+	for i in len(sys.argv):
+		if i == 1:
+			continue
+		staff_dict
+		try:
+			return int(sys.argv[i])
+		except ValueError:
+			print("Parameter Error")
+			return None
+
+def calculate_insurance(income,insuranceSum):
+	return income * insuranceSum
+
+def calculate_tax(income,insurance):
+	incomeTax = income - insurance - 3500
 	if incomeTax <= 0:
 		tax = 0
 	elif incomeTax <= 1500:
@@ -32,10 +48,18 @@ def calculate_tax(income):
 		tax = incomeTax * 0.45 - 13505
 	return tax
 
+def calulate_finalIncome(income):
+	insurance = calculate_insurance(income, insuranceSum)
+	tax = calculate_tax(income, insurance)
+	final_income = income - insurance - tax
+	final_income = format(final_income,".2f")
+	return final_income
+
 if __name__ == '__main__':
+	insuranceSum = 0
+	for value in insurance_dict.values():
+		insuranceSum += value
 	income = get_input()
 	if income != None:
-		tax = calculate_tax(income)
-		tax = format(tax,".2f")
-		print(tax)
+		print(final_income)
 
