@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
-from multiprocess import Process, Queue
+from multiprocessing import Process, Queue, Lock, Value
 
 staff_dict = {}
 
@@ -16,21 +16,23 @@ def read_standard(filename):
 				number.append(float(line[pos+2:]))
 	return number
 
-def get_staff_information(filename):
+def get_staff_information(filename,lineNumber):
 	with open(filename,'r') as file:
 		content = file.readlines()
+		lineNumber.value = len(content)
 		for string in content:
 			information = string.split(',')
 			try:
 				income = int(information[1])
 				key = information[0]
+				with lock1:
+						queue1.put([key,income])
 			except ValueError:
 				print("Parameter Error")
 				return None
-			staff_dict[key] = income
 	return True
 
-def calculate_shebao(income):
+def calculate_shebao(income, number):
 	jishuL = number[0]
 	jishuH = number[1]
 	insuranceSum = sum(number[2:])
@@ -61,30 +63,47 @@ def calculate_tax(incomeAfterShebao):
 		tax = incomeTax * 0.45 - 13505
 	return tax
 
-def calculate(filename):
+def calculate(filename,lineNumber):
 	number = read_standard(filename)
+	while lineNumber.value == -1:
+		pass
+	for i in range(lineNumber.value):
+		data = queue1.get()
+		incomeBeforeTax = data[1]
+		shebao = calculate_shebao(incomeBeforeTax, number)
+		incomeAfterShebao = incomeBeforeTax - shebao
+		tax = calculate_tax(incomeAfterShebao)
+		incomeAfterTax = incomeAfterShebao - tax
+		shebao = format(shebao,".2f")
+		tax = format(tax,".2f")
+		incomeAfterTax = format(incomeAfterTax,".2f")
+		with lock2:
+			queue2.put([data[0],str(incomeBeforeTax),shebao,tax,incomeAfterTax])
 
-
-def output_file(filename):
+def output_file(filename,lineNumber):
 	with open(filename,'w') as file:
-		for staffNumber,incomeBeforeTax in staff_dict.items():
-			shebao = calculate_shebao(incomeBeforeTax)
-			incomeAfterShebao = incomeBeforeTax - shebao
-			tax = calculate_tax(incomeAfterShebao)
-			incomeAfterTax = incomeAfterShebao - tax
-			shebao = format(shebao,".2f")
-			tax = format(tax,".2f")
-			incomeAfterTax = format(incomeAfterTax,".2f")
-			file.write(staffNumber+','+str(incomeBeforeTax)+ ','+ shebao + ',' + tax + ',' + incomeAfterTax+'\n')
+		while lineNumber.value == -1:
+			pass
+		for i in range(lineNumber.value):
+			data = queue2.get()
+			for content in data:
+				file.write(content + ',')
+
+			file.write('\b\n')
 
 if __name__ == '__main__':
 	staffFilename = sys.argv[4]
 	outputFilename = sys.argv[6]
 	standardFile = sys.argv[2]
 
-	Process(target = get_staff_information).start()
-	Process(target = calculate).start()
-	Process(target = output_file).start()
+	lock1 = Lock()
+	lock2 = Lock()
+
+	lineNumber = Value('i',-1)
+
+	Process(target = get_staff_information ,args = (staffFilename,lineNumber)).start()
+	Process(target = calculate , args = (standardFile,lineNumber)).start()
+	Process(target = output_file , args = (outputFilename,lineNumber)).start()
 
 
 	
