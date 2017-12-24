@@ -1,0 +1,8 @@
+{% for key,value in output.items() %}
+	<p> file name: {{key}} </p>
+	{% for name,text in value.items() %}
+		<p> {{name}} : {{text}} </p>
+	{% endfor %}
+	<br>
+	<br>
+{% endfor %}
