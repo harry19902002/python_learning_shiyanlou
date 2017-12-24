@@ -46,14 +46,17 @@ def index():
 	print(output)
 	return render_template('index.html',output = output)
 
-@app.route('/files/<filename>')
-def file(filename):
-	id_list = db.session.query(File).all()
-	if filename in id_list:
-		file_db = db_session.query(File).filter(File.id == id).first()
-		print (file_db.title)
-	else:
-		abort(404)
+@app.route('/files/<input>')
+def file(input):
+	id = int(input)
+	db_list = db.session.query(File).all()
+	for file_db in db_list:		
+		if id == file_db.id:
+			print('True')
+			file_db = db.session.query(File).filter(File.id == id).first()
+			return render_template('file.html', file = file_db)
+		else:
+			abort(404)
 
 @app.route('/address')
 def address():
