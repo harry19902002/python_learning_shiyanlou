@@ -1,0 +1,14 @@
+<head>
+		<link href={{ url_for('static',filename="bootstrap-3.3.7-dist/css/bootstrap.min.css")}} rel="stylesheet">
+</head>
+
+<body>
+	<script src="{{ url_for('static',filename="bootstrap-3.3.7-dist/css/bootstrap.min.js")}} "></script>
+{% for key,value in title_list.items() %}
+	<p> <a href = "{{value}}"> {{key}} </a></p>
+	<p> tags: </p>
+	{% for tag in tag_list[key] %}
+		<p>{{tag}}</p>
+	{% endfor %}
+{% endfor %}
+</body>
