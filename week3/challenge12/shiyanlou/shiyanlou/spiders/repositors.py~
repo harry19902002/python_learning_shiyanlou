@@ -1,0 +1,35 @@
+# -*- coding: utf-8 -*-
+import scrapy
+from shiyanlou.items import ShiyanlouItem
+
+
+class RepositorsSpider(scrapy.Spider):
+    name = 'repositors'
+    allowed_domains = ['github.com']
+
+    @property
+    def start_urls(self):
+        urls_tmpl = 'https://github.com/shiyanlou?page={}&tab=repositories'
+        return (urls_tmpl.format(i) for i in range(1,4))
+
+    def parse(self, response):
+        datadict = {}
+        yield{
+            'name' : response.xpath('//div[@class="d-inline-block mb-1"]/h3/a/text()').re_first(r'\s*(.+)'),
+            'update_time' : response.xpath('//div[@class="f6 text-gray mt-2"]/relative-time/@datetime').extract_first(),
+            #'commits' : response.xpath('//ul[@class="numbers-summary"]/li[1]/a/span/text()').re_first('[^\d]*(\d*)[^\d]*'),
+            #'branches' : response.xpath('//ul[@class="numbers-summary"]/li[1]/a/span/text()').re_first('[^\d]*(\d*)[^\d]*'),
+            #'releases' : response.xpath('//ul[@class="numbers-summary"]/li[1]/a/span/text()').re_first('[^\d]*(\d*)[^\d]*')
+             }
+
+        for url in response.xpath('//div[@class="d-inline-block mb-1"]/h3/a/@href'):
+            yield response.follow(url, callback = self.parse)
+
+        yield{
+            #'name' : response.xpath('//div[@class="d-inline-block mb-1"]/h3/a/text()').re_first(r'\s*(.+)'),
+            #'update_time' : response.xpath('//div[@class="f6 text-gray mt-2"]/relative-time/@datetime').extract_first(),
+            'commits' : response.xpath('//ul[@class="numbers-summary"]/li[1]/a/span/text()').re_first('[^\d]*(\d*)[^\d]*'),
+            'branches' : response.xpath('//ul[@class="numbers-summary"]/li[1]/a/span/text()').re_first('[^\d]*(\d*)[^\d]*'),
+            'releases' : response.xpath('//ul[@class="numbers-summary"]/li[1]/a/span/text()').re_first('[^\d]*(\d*)[^\d]*')
+             }        
+
